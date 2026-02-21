@@ -27,16 +27,16 @@ export default function App() {
     const [selectedRows, setSelectedRows] = useState<ArticleData[]>([]);
     const [loader, setloader] = useState<boolean>(true);
 
-    // --- new states ---
+    
     const [bulkInput, setBulkInput] = useState<string>("");
     const [targetCount, setTargetCount] = useState<number>(0);
     const [manualDeselected, setManualDeselected] = useState<Set<number>>(new Set());
     const overlayRef = useRef<OverlayPanel>(null);
-    // ------------------
+   
 
     const totalrecords = 130023;
 
-    // Decides which rows on current page should be checked — pure math, no API call
+    
     const computeSelectedRows = (fetchedRows: ArticleData[]) => {
         return fetchedRows.filter((row, localIndex) => {
             const globalIndex = (page - 1) * 12 + localIndex;
@@ -77,34 +77,34 @@ export default function App() {
             let data: ArticleData[] = result2 as ArticleData[];
             setloader(false);
             setrows(data);
-            setSelectedRows(computeSelectedRows(data)); // auto-check rows based on targetCount
+            setSelectedRows(computeSelectedRows(data)); 
             setfirst(12 * (page - 1) + 1);
             setlast(12 * page);
         };
 
         fetchdata();
-    }, [page, targetCount, manualDeselected]); // re-run when any of these change
+    }, [page, targetCount, manualDeselected]); 
 
-    // When user clicks Select button — just saves the number, no API call
+
     const handleBulkSelect = () => {
         const count = parseInt(bulkInput);
         if (isNaN(count) || count <= 0) return;
         overlayRef.current?.hide();
         setTargetCount(count);
-        setManualDeselected(new Set()); // reset manual unchecks for fresh selection
+        setManualDeselected(new Set()); 
         setBulkInput("");
     };
 
-    // Total selected count across all pages (calculated logically, not from array)
+   
     const totalSelected =
         Math.max(0, targetCount - manualDeselected.size) +
         selectedRows.filter((r) => {
             const localIndex = rows.findIndex((row) => row.id === r.id);
             const globalIndex = (page - 1) * 12 + localIndex;
-            return globalIndex >= targetCount; // rows checked outside bulk range
+            return globalIndex >= targetCount;
         }).length;
 
-    // Custom header with chevron icon + overlay popup
+    
     const customSelection = () => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span
@@ -173,16 +173,16 @@ export default function App() {
                     const currentPageIds = rows.map(r => r.id);
                     const newSelectedIds = new Set(newSelected.map(r => r.id));
 
-                    // Track which bulk-selected rows the user manually unchecked
+                   
                     setManualDeselected(prev => {
                         const updated = new Set(prev);
                         currentPageIds.forEach((id, localIndex) => {
                             const globalIndex = (page - 1) * 12 + localIndex;
                             if (globalIndex < targetCount) {
                                 if (!newSelectedIds.has(id)) {
-                                    updated.add(id);    // user unchecked it
+                                    updated.add(id);    
                                 } else {
-                                    updated.delete(id); // user re-checked it
+                                    updated.delete(id); 
                                 }
                             }
                         });
