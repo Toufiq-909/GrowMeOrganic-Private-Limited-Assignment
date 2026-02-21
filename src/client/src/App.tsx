@@ -3,12 +3,17 @@ import { useState, useEffect } from 'react';
 import {z} from "zod"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-
+import 'primeicons/primeicons.css';
 import { Button } from 'primereact/button';
-import { ProgressSpinner } from 'primereact/progressspinner';
+      
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; //theme
+
+        
+import 'primereact/resources/primereact.min.css';
+
  type ArticleData={
     title:string,
+    id: number,
     place_of_origin:string,
     artist_display:string,
     inscriptions:string,
@@ -25,7 +30,7 @@ export default function App() {
      const [loader,setloader]=useState<boolean>(true)
      const totalrecords=130023
     useEffect(()=>{
-//setloader(true);
+setloader(true);
 window.scrollTo(0,0);
         let fetchdata=async ()=>{
             let response=await fetch("https://api.artic.edu/api/v1/artworks?page="+page);
@@ -37,13 +42,14 @@ window.scrollTo(0,0);
     artist_display:z.string().nullable(),
     inscriptions:z.string().nullable(),
     date_start:z.number().nullable(),
-    date_end:z.number().nullable()
+    date_end:z.number().nullable(),
+    id:z.number()
 })
 let arrayOfRowsSchema=z.array(rowschema)
 
 let result2=arrayOfRowsSchema.parse(responseData.data)
 console.log(result2);
-result2=result2.map((curr,index)=>{
+result2=result2.map((curr)=>{
    if(!curr.date_start)
    {
     curr.date_start=-1
@@ -67,7 +73,7 @@ result2=result2.map((curr,index)=>{
    return curr  
 })
 let data:ArticleData[] =(result2) as ArticleData[]
-//setloader(false)
+setloader(false)
 setrows(data)
 setfirst(12*(page-1)+1)
 setlast(12*page)
@@ -122,17 +128,22 @@ onClick={()=>{
         </div>
     )
 }
+let customSelection=()=>{
+    return(
+        <p>asdf</p>
+    )
+}
     return (
         <div className="card">
         <p className={"text-neutral-400"}>Selected : {selectedRows.length} rows</p>
-         <DataTable value={rows}   paginator  rows={12}
+         <DataTable value={rows}   loading={loader}   
+  loadingIcon="pi pi-spin pi-spinner"   paginator  rows={12}
             
                     
                      selectionMode="checkbox" selection={selectedRows} 
                     onSelectionChange={(e) => {
                         const rows = e.value as ArticleData[];
-                        //localstorage.getItems
-                                               setSelectedRows(rows);
+                        setSelectedRows(rows);
                     }}
                     paginatorLeft={currentPageReportTemplate()}
                     paginatorRight={Navigation()}
@@ -141,7 +152,7 @@ onClick={()=>{
                     
                 >
                       
-                <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
+                <Column selectionMode="multiple" header={customSelection} headerStyle={{ width: '3rem' }}></Column>
                 <Column field="title" header="TITLE" className={"!font-bold"}></Column>
                 <Column field="place_of_origin" header="PLACE OF ORIGIN"></Column>
                 <Column field="artist_display" header="ARTIST"></Column>
